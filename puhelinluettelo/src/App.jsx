@@ -78,11 +78,31 @@ const App = () => {
 
   const addName = (event) => {
     event.preventDefault();
-    const isAlreadyAdded = persons.some((person) => person.name === newName);
+    const isAlreadyAdded = persons.some((person) => person.name === newName && person.number === newNumber);
     if (isAlreadyAdded) {
       alert(newName + " is already added to phonebook");
       return;
     }
+
+    const isChanging = persons.some((person) => person.name === newName && person.number !== newNumber);
+    if (isChanging) {
+      if (window.confirm(newName + " is already added to the phonebook. Do you wish to replace the old number with a new one?")) {
+        const id = persons.find(person => person.name === newName).id
+        personService
+        .update(id, {name: newName, number: newNumber})
+        .then(response => {
+          const updatedPersons = persons.map(person => {
+            if(person.id !== id) {
+              return person;
+            }
+            return response.data
+          })
+          setPersons(updatedPersons)
+        })
+      }
+      return
+    }
+
     const nameObject = {
       name: newName,
       number: newNumber,
