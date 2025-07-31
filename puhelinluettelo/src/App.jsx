@@ -145,7 +145,6 @@ const App = () => {
     const nameObject = {
       name: newName,
       number: newNumber,
-      id: String(persons.length + 1),
     };
 
     personService.create(nameObject).then((response) => {
