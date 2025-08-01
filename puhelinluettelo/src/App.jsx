@@ -35,14 +35,14 @@ const PersonForm = ({
 const Persons = ({ filterNames, persons, setPersons, setNotification }) => {
   const handleDelete = (id, name) => {
     if (window.confirm("Delete " + name + "?")) {
-      personService.remove(id).catch(error => {
+      personService.remove(id).catch((error) => {
         setNotification({
-        message: name + " has already been deleted",
-        isError: true,
-      });
-      setTimeout(() => {
-        setNotification(null);
-      }, 5000);
+          message: name + " has already been deleted",
+          isError: true,
+        });
+        setTimeout(() => {
+          setNotification(null);
+        }, 5000);
       });
       setPersons(persons.filter((person) => person.id !== id));
       setNotification({
@@ -95,6 +95,7 @@ const App = () => {
 
   const addName = (event) => {
     event.preventDefault();
+
     const isAlreadyAdded = persons.some(
       (person) => person.name === newName && person.number === newNumber
     );
@@ -123,12 +124,9 @@ const App = () => {
         personService
           .update(id, { name: newName, number: newNumber })
           .then((response) => {
-            const updatedPersons = persons.map((person) => {
-              if (person.id !== id) {
-                return person;
-              }
-              return response.data;
-            });
+            const updatedPersons = persons.map((person) =>
+              person.id !== id ? person : response.data
+            );
             setPersons(updatedPersons);
             setNotification({
               message: "The number of " + newName + " has been changed",
@@ -138,6 +136,16 @@ const App = () => {
               setNotification(null);
             }, 5000);
           })
+          .catch((error) => {
+            const errorMsg = error.response?.data?.error;
+            setNotification({
+              message: errorMsg,
+              isError: true,
+            });
+            setTimeout(() => {
+              setNotification(null);
+            }, 5000);
+          });
       }
       return;
     }
@@ -147,17 +155,28 @@ const App = () => {
       number: newNumber,
     };
 
-    personService.create(nameObject).then((response) => {
-      console.log(response);
-      setPersons([...persons, response.data]);
-      setNotification({
-        message: newName + " has been added",
-        isError: false,
+    personService
+      .create(nameObject)
+      .then((response) => {
+        setPersons([...persons, response.data]);
+        setNotification({
+          message: newName + " has been added",
+          isError: false,
+        });
+        setTimeout(() => {
+          setNotification(null);
+        }, 5000);
+      })
+      .catch((error) => {
+        const errorMsg = error.response?.data?.error;
+        setNotification({
+          message: errorMsg,
+          isError: true,
+        });
+        setTimeout(() => {
+          setNotification(null);
+        }, 5000);
       });
-      setTimeout(() => {
-        setNotification(null);
-      }, 5000);
-    });
   };
 
   const filterNames = persons.filter((person) =>
